@@ -9,18 +9,19 @@ import (
 	"unicode"
 )
 
-var ErrInvalidString = errors.New("invalid string")
+var (
+	ErrInvalidString = errors.New("invalid string")
+	Re               = regexp.MustCompile(`^\d.+|.*\d{2,}.*`)
+)
 
 func validate(s string) (err error) {
-	re := regexp.MustCompile(`^\d.+|.*\d{2,}.*`)
-
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println("panic occurred:", err)
 		}
 	}()
 
-	if re.MatchString(s) {
+	if Re.MatchString(s) {
 		return ErrInvalidString
 	}
 
@@ -34,12 +35,13 @@ func Unpack(s string) (string, error) {
 
 	var o string
 
-	for i := 0; i < len(s); i++ {
-		if i+1 < len(s) && unicode.IsDigit(rune(s[i+1])) {
+	runes := []rune(s)
+	for i := 0; i < len(runes); i++ {
+		if i+1 < len(runes) && unicode.IsDigit(runes[i+1]) {
 			continue
-		} else if unicode.IsDigit(rune(s[i])) {
-			num, _ := strconv.Atoi(string(s[i]))
-			o += strings.Repeat(string(s[i-1]), num)
+		} else if unicode.IsDigit(runes[i]) {
+			num, _ := strconv.Atoi(string(runes[i]))
+			o += strings.Repeat(string(runes[i-1]), num)
 			continue
 		}
 		o += string(s[i])

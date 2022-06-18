@@ -1,4 +1,4 @@
-module artem198315/golang-labs/hw02_unpack_string
+module github.com/artem198315/golang-labs/hw02_unpack_string
 
 go 1.18
 
