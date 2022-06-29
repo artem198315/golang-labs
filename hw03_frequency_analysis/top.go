@@ -12,23 +12,18 @@ type word struct {
 }
 
 var (
-	re0 = regexp.MustCompile(`(["!?,.:;])|( - )|(- )`)
-	re1 = regexp.MustCompile(`["]*([а-яА-Я]+)([",.:!?;])*\s+`)
+	re0 = regexp.MustCompile(`["!?,.:;']`)
+	re1 = regexp.MustCompile(`( - )|(- )|(-$)`)
+	re2 = regexp.MustCompile(`["]*([а-яА-Яa-zA-Z]+)([",.:!?;'])*\s+`)
 )
 
 func prepare(s string) string {
 	s = re0.ReplaceAllString(s, " ")
-	s = re1.ReplaceAllString(s, "$1 ")
+	s = re1.ReplaceAllString(s, " ")
+	s = re2.ReplaceAllString(s, "$1 ")
 	s = strings.ToLower(s)
 
 	return s
-}
-
-func sortWords(k *[]word) {
-	w := *k
-	sort.Slice(w, func(i, j int) bool {
-		return w[i].count > w[j].count || ((w[i].count == w[j].count) && (w[i].word < w[j].word))
-	})
 }
 
 func Top10(s string) []string {
@@ -47,13 +42,15 @@ func Top10(s string) []string {
 		words[v]++
 	}
 
-	w := []word{}
+	w := make([]word, 0, len(words))
 
 	for k, v := range words {
 		w = append(w, word{word: k, count: v})
 	}
 
-	sortWords(&w)
+	sort.Slice(w, func(i, j int) bool {
+		return w[i].count > w[j].count || ((w[i].count == w[j].count) && (w[i].word < w[j].word))
+	})
 
 	if len(w) > 10 {
 		w = w[:10]
