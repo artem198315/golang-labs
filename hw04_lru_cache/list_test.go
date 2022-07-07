@@ -15,6 +15,37 @@ func TestList(t *testing.T) {
 		require.Nil(t, l.Back())
 	})
 
+	t.Run("check first", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+
+		require.Nil(t, l.Front().Prev)
+		require.Nil(t, l.Back().Next)
+	})
+
+	t.Run("check last", func(t *testing.T) {
+		l := NewList()
+
+		l.PushBack(10)
+
+		require.Nil(t, l.Back().Next)
+		require.Nil(t, l.Front().Prev)
+	})
+
+	t.Run("check move to front", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10)
+		l.PushBack(20)
+
+		l.MoveToFront(l.Front())
+		l.MoveToFront(l.Back())
+
+		require.Nil(t, l.Back().Next)
+		require.Nil(t, l.Front().Prev)
+	})
+
 	t.Run("complex", func(t *testing.T) {
 		l := NewList()
 

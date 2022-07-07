@@ -49,13 +49,62 @@ func TestCache(t *testing.T) {
 		require.Nil(t, val)
 	})
 
+	t.Run("check capacity", func(t *testing.T) {
+		c := NewCache(2)
+
+		c.Set("l1", 1)
+		c.Set("l2", 2)
+		c.Set("l3", 3)
+		c.Set("l4", 4)
+
+		a := c.(*lruCache)
+		elems := make([]int, 0, len(a.items))
+		for i := a.queue.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(cacheItem).value.(int))
+		}
+		require.Equal(t, []int{4, 3}, elems)
+	})
+
+	t.Run("check lastman standing", func(t *testing.T) {
+		c := NewCache(3)
+
+		c.Set("l1", 1)
+		c.Set("l2", 2)
+		c.Set("l3", 3)
+		c.Set("l4", 4)
+		c.Set("l3", 3)
+		c.Set("l4", 4)
+		c.Set("l3", 3)
+		c.Set("l5", 5)
+
+		a := c.(*lruCache)
+		elems := make([]int, 0, len(a.items))
+		for i := a.queue.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(cacheItem).value.(int))
+		}
+		require.Equal(t, []int{5, 3, 4}, elems)
+	})
+
 	t.Run("purge logic", func(t *testing.T) {
-		// Write me
+		c := NewCache(3)
+
+		c.Set("l1", 5)
+		c.Set("l2", 5)
+		c.Set("l3", 5)
+
+		c.Clear()
+
+		tr := c.(*lruCache)
+		q := (tr.queue.Front() == nil && tr.queue.Back() == nil)
+		i := (len(tr.items) == 0)
+
+		require.True(t, q)
+		require.True(t, i)
 	})
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove me if task with asterisk completed.
+	// t.Skip() // Remove me if task with asterisk completed.
 
 	c := NewCache(10)
 	wg := &sync.WaitGroup{}
